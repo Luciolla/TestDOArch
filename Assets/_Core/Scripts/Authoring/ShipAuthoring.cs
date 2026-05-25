@@ -15,6 +15,8 @@ namespace _Core.Scripts.Authoring
 		// Стартовое значение перегрева для теста
 		public float MaxHeatCapacity = 100f;
 		public float PassiveCooling = 5f;
+		
+		public bool IsPlayer = false;
 
 		// В DOTS Baker (конвертит данные)
 		private class Baker : Baker<ShipAuthoring>
@@ -47,6 +49,9 @@ namespace _Core.Scripts.Authoring
 
 				// Компонент для ввода (пока пустой, его будет заполнять система)
 				AddComponent(entity, new ThrustInput { Value = float2.zero });
+				
+				if (authoring.IsPlayer)
+					AddComponent(entity, new PlayerTag());
 			}
 		}
 	}
