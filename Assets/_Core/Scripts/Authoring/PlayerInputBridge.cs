@@ -11,34 +11,34 @@ namespace _Core.Scripts.Authoring
 		private EntityManager _entityManager;
 		private EntityQuery _playerQuery;
 
-		private void Start()
+		private void Awake()
 		{
-			// Получаем доступ к ECS миру
-			_entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
-        
-			// Создаем запрос, чтобы найти сущность с нашим тегом и компонентом ввода
+			// Ищем ECS World, только если еще не нашли
+			var world = World.DefaultGameObjectInjectionWorld;
+			if(world == null)
+				return;
+
+			_entityManager = world.EntityManager;
+			// Ищем сущность, у которой есть и PlayerTag, и ThrustInput
 			_playerQuery = _entityManager.CreateEntityQuery(typeof(PlayerTag), typeof(ThrustInput));
+
 		}
 
 		private void Update()
 		{
-			// Если сущность игрока еще не заспавнилась/не сконвертировалась - выходим
-			if (_playerQuery.IsEmpty) return;
+			// Если мир еще не прогрузился или сущность не создана - выходим
+			if(_playerQuery == null || _playerQuery.IsEmpty) return;
 
-			// Читаем ввод с клавиатуры (возможно стоит переделать под NIS, но пока лень)
+			// Считываем клавиатуру
 			var x = Input.GetAxis("Horizontal"); // A/D
-			var y = Input.GetAxis("Vertical");   // W/S
+			var y = Input.GetAxis("Vertical"); // W/S
 
-			// Формируем данные
-			var input = new ThrustInput
-			{
+			var input = new ThrustInput {
 				Value = new float2(x, y)
 			};
 
-			// Находим сущность игрока (она одна, так что GetSingletonEntity должен сработать)
+			// Находим нашего игрока и пушим данные
 			Entity playerEntity = _playerQuery.GetSingletonEntity();
-        
-			// Записываем ввод прямо в компонент сущности!
 			_entityManager.SetComponentData(playerEntity, input);
 		}
 	}
